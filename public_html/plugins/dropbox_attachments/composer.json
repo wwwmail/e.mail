@@ -1,0 +1,25 @@
+{
+    "name": "hassansin/dropbox_attachments",
+    "type": "roundcube-plugin",
+    "description": "Attach files from Dropbox",
+    "keywords": ["dropbox","attachments","roundcube"],
+    "license": "GPL-3.0+",
+    "homepage":"https://github.com/hassansin/dropbox_attachments",
+    "authors": [
+        {
+            "name": "Hassansin",
+            "email": "rezatxe@gmail.com",
+            "homepage":"https://github.com/hassansin",
+            "role": "Develovper"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://plugins.roundcube.net"
+        }
+    ],
+    "require": {
+        "roundcube/plugin-installer": ">=0.1.6"
+    }
+}

@@ -1,0 +1,252 @@
+<style>
+    #mesto_zabora {
+    width: 300px !important;
+    text-overflow: ellipsis;
+}
+
+</style>
+<div style="width:100px; overflow:hidden">
+<select name="data" id="mesto_zabora">
+ <option value="1">Lorem Ipsum</option>
+ <option value="3">simply dummy</option>
+ <option value="3">text of the printing and typesetting industry. Lorem Ipsum has been the industry's text of the printing and typesetting industry. Lorem Ipsum has been the industry's</option>
+</select> 
+</div>
+
+
+
+<form name="form" method="post" action="http://roundcube.test/?_task=login">
+    <input type="hidden" name="from" value="main.page">
+    <input type="hidden" name="valid" value="1">
+    <input type="hidden" name="_task" value="login">
+    <input type="hidden" name="_action" value="login">
+    <input type="hidden" name="_timezone" id="rcmlogintz" value="Europe/Kiev">
+    <input type="hidden" name="_url" id="rcmloginurl" value="_task=login">
+    <table>
+        <tbody><tr><td class="title"><label for="rcmloginuser">Username</label>
+                </td>
+                <td class="input"><input name="_user" id="rcmloginuser" required="required" size="40" autocapitalize="off" autocomplete="off" type="text"></td>
+            </tr>
+            <tr><td class="title"><label for="rcmloginpwd">Password</label>
+                </td>
+                <td class="input"><input name="_pass" id="rcmloginpwd" required="required" size="40" autocapitalize="off" autocomplete="off" type="password"></td>
+            </tr>
+        </tbody>
+    </table>
+    <p class="formbuttons"><input type="submit" id="rcmloginsubmit" class="button mainaction" value="Login"></p>
+
+</form>
+
+
+<?php
+die;
+if (isset($action) && $action=='restart') {
+  // Initialize the session.
+  // If you are using session_name("something"), don't forget it now!
+
+  // Unset all of the session variables.
+  $_SESSION = array();
+
+  // If it's desired to kill the session, also delete the session cookie.
+  // Note: This will destroy the session, and not just the session data!
+  if (ini_get("session.use_cookies")) {
+      $params = session_get_cookie_params();
+      setcookie(session_name(), '', time() - 42000,
+          $params["path"], $params["domain"],
+          $params["secure"], $params["httponly"]
+      );
+  }
+
+  // Finally, destroy the session.
+  session_destroy();
+  Header ("Location: ./");
+  die();
+}
+session_start();
+require_once "./globals.php";
+require_once "./params.php";
+require_once "./signature.php";
+
+Header('Expires: ' . GMDate('D, d M Y H:i:s') . ' GMT'); // neukládej do cache
+Header('Cache-Control: no-store, no-cache, must-revalidate, pre-check=0, post-check=0, max-age=0');
+Header('Pragma: no-cache');
+Header('Content-Type: text/html; charset=UTF-8');
+
+function uprav($data)
+{
+	return str_replace("\\n", "<br/>", $data);
+}
+
+function cislo($cislo, $delka = 0, $des = true, $zaporne=false)
+{
+	$cislo = trim(strtr($cislo, ",", "."));
+	$cislo = trim(strtr($cislo, "+", ""));
+	if ($delka != 0 && strlen($cislo) != $delka) {
+		return false;
+	}
+	$oddel = 0;
+	for ($i = 0; $i < strlen($cislo); $i++) {
+		if ($zaporne && $i==0 && $cislo[$i]=="-") {
+			continue;
+		}
+		if ($cislo[$i] == '.') {
+			$oddel++;
+		} elseif ($cislo[$i] < '0' || $cislo[$i] > '9') {
+			return false;
+		}
+	}
+	if ($oddel > 1 ||
+		($oddel != 0 && !$des &&
+	(substr($cislo, 0, strpos($cislo, ".")) != $cislo))) {
+		return false;
+	}
+	return true;
+}
+function getAmountInSmallest($data){
+	//echo "data: $data - ";
+	$data = trim(strtr($data, ",", "."));
+	$pos = strpos($data, ".");
+	if ($pos !== false){
+		//echo " -uprava- ";
+		$a = substr($data, 0, $pos);
+		$b = substr($data, $pos+1);
+		while (strlen($b)<2) {
+			$b.="0";
+		}
+		$data = ($a.$b)*1;
+	}else{
+		//echo " -nasobeni- ";
+		$data=$data*100;
+	}
+	//echo "$data<br/>";
+	return $data;
+}
+if (isset($HTTPS) && $HTTPS == 'on') {
+	$protokol = "https";
+} else {
+	$protokol = "http";
+}
+
+if (!isset($action) || trim($action)==""){
+  $action = "";
+}
+
+if (!isset($popis) || !is_array($popis)){
+	$popis = array();
+}
+
+if (!isset($merchantId)) {
+	$merchantId=MERCHANT_NUMBER;
+}
+if (!isset($cesta)) {
+	$cesta=GP_URL;
+}
+if (!isset($paymuzo)) {
+	$paymuzo="|";
+}
+?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="Expires" content="Fri, Jan 01 1900 00:00:00 GMT">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Cache-Control" content="no-cache">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="shortcut icon" href="img/favicon.ico" mce_href="img/favicon.ico">
+<link rel="stylesheet" type="text/css" href="css/common.css">
+<link rel="stylesheet" type="text/css" href="css/forms.css">
+<link rel="stylesheet" type="text/css" href="css/pay.css">
+<title>GP webpay - Demo</title>
+
+</head>
+
+<body  style="background-image: url('img/menu_background.png'); background-repeat: repeat-y;">
+<table border="0" width="100%" height="100px" cellpadding="0" cellspacing="0">
+	<tr valign="top">
+		<td rowspan="2" colspan="2">
+			<div id="header-left"><a href="" id="gplogo"></a>
+				<div id="lineleft"></div>
+			</div>
+		</td>
+		<td bgcolor="#072E6E">
+
+			<div id="header-right">
+				<div id="header-right-top">
+					<div id="applogo" style="background-image: url('img/gppay.gif');background-repeat: no-repeat;"></div>
+					<div id="pic1"></div>
+					<div id="pic2"></div>
+				</div>
+
+			</div>
+		</td>
+		<td bgcolor="#072E6E" width="100%"></td>
+	</tr>
+	<tr>
+		<td bgcolor="#FFFFFF" width="100%" height="31px">
+			<div id="header-right-bottom">
+				<div id="topline"></div>
+			</div>
+
+		</td>
+	</tr>
+</table>
+<div id="language" style="width: 63px;"></div>
+<div id="user-name"></div>
+<div id="bank"></div>
+<table border="0" width="100%" cellpadding="0" cellspacing="0">
+	<tr>
+		<td width="162" height="100%" valign="top">
+			<div id="menu">
+				<div id="menu-tp-menutop"></div>
+				<div id="menu-gp">
+					<a href="?action=sign" class="menuItem" style="height: 35px;">Vypocet podpisu&nbsp;/<br/>Digest generation</a>
+					<a href="?action=verify" class="menuItem" style="height: 35px;">Overeni podpisu&nbsp;/<br/>Digest verification</a>
+					<a href="#" class="menuItem"></a>
+					<a href="?action=shop" class="menuItem" style="height: 35px;">Demo objednavka&nbsp;/<br/>Demo order</a>
+					<a href="#" class="menuItem"></a>
+					<a href="?action=shopMps" class="menuItem">MasterPass Demo</a>
+					<a href="#" class="menuItem"></a>
+					<a href="?action=restart" class="menuItem">Session restart</a>
+				</div>
+			</div>
+		</td>
+		<td valign="top">
+			<div id="main">
+				<div id="main-top"><h1 class="fontHeader">Demo GP webpay</h1></div>
+				<div id="main-bottom" align="center">
+					<div class="formboxDiv">
+            <?
+            switch ($action){
+              case "verify":
+                require_once "demo_verify.php";
+                break;
+              case "sign":
+              	require_once "demo_sign.php";
+              	break;
+              case "shop":
+              	require_once "demo_shop.php";
+              	break;
+              case "shopMps":
+              	require_once "demo_shopMps.php";
+              	break;
+              case "payment":
+              	require_once "demo_payment.php";
+              	break;
+              case "response":
+              case "responseMps":
+              	require_once "demo_response.php";
+              	break;
+              default:
+                require_once "demo_warning.php";
+                break;
+            }
+            ?>
+				  </div>
+		    </div>
+		  </div>
+		</td>
+	</tr>
+</table>
+
+</body>
+</html>
