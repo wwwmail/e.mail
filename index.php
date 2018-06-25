@@ -535,7 +535,7 @@ else if ($RCMAIL->task != 'login' && $_SESSION['user_id']) {
 // not logged in -> show login page
 if (empty($RCMAIL->user->ID)) {
   header("Location: $domenApi");
-
+die;
  // echo 'test redirect'; die; 
     // log session failures
     $task = rcube_utils::get_input_value('_task', rcube_utils::INPUT_GPC);
